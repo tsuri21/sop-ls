@@ -37,5 +37,5 @@ int main(int argc, char *argv[])
         target_path = argv[optind];
     }
 
-
+    traverse_directory(target_path, opts);
 }
