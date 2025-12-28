@@ -1,41 +1,67 @@
 #include <stdio.h>
-#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
 #include "options.h"
 #include "list_core.h"
 
-int main(int argc, char *argv[])
+int main(const int argc, char *argv[])
 {
     //option flags
     Options opts = {
         .recursive = false,
         .human_readable = false,
-        .show_size = false
+        .show_size = false,
+        .show_all = false
     };
-    int opt;
     char* target_path = ".";
 
-    while ((opt = getopt(argc, argv, "-hrs")) != -1) {
-        switch (opt) {
+    for (int i =1; i < argc; i++)
+    {
+        if (argv[i][0] != '-')
+        {
+            target_path = argv[i];
+            continue;
+        }
+
+        char optionLetter = argv[i][1];
+        int optionCounter = -1;
+        char* optionString = "";
+
+        if (strlen(argv[i]) > 3)
+        {
+            optionString = argv[i];
+            optionString += 3;
+            optionCounter = atoi(optionString);
+        }
+        switch (optionLetter)
+        {
         case 'h':
             opts.human_readable = true;
-            break;
-        case 'r':
-            opts.recursive = true;
-            break;
+            continue;
+
         case 's':
             opts.show_size = true;
-            break;
-        case '?':
-            fprintf(stderr, "Unknown option `-%c'.\n", optopt);
-            return 1;
+            opts.unit = optionString;
+            continue;
+
+        case 'r':
+            opts.recursive = true;
+            opts.r_counter = optionCounter;
+            continue;
+
+        case 'c':
+            opts.show_content = true;
+            opts.c_counter = optionCounter;
+            continue;
+
+        case 'a':
+            opts.show_all = true;
+            continue;
+
         default:
-            break;
+            printf("unknown option\n");
+            return 1;
         }
     }
-    if (optind < argc)
-    {
-        target_path = argv[optind];
-    }
-
     traverse_directory(target_path, opts);
 }

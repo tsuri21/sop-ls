@@ -6,8 +6,9 @@
 
 #include "output_utils.h"
 
-static void traverse_recursive(const char* path, Options opts, int depth)
+static void traverse_recursive(const char* path, const Options opts, const int depth)
 {
+    if (depth > opts.r_counter && opts.r_counter >= 0) return;
     struct stat info;
     char fullPath[PATH_MAX];
     DIR* dir = opendir(path);
@@ -22,18 +23,23 @@ static void traverse_recursive(const char* path, Options opts, int depth)
     while ((entry = readdir(dir)) != NULL)
     {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
-
+        if (entry->d_name[0] == '.' && !opts.show_all) continue;
         snprintf(fullPath, PATH_MAX, "%s/%s", path, entry->d_name);
         stat(fullPath, &info);
 
-        printUtils(entry->d_name, &info, opts, depth);
+        printUtils(fullPath, entry->d_name, &info, opts, depth);
         if (S_ISDIR(info.st_mode)) traverse_recursive(fullPath, opts, depth+1);
     }
     closedir(dir);
 }
-void traverse_directory(const char* path, Options opts)
+
+void traverse_directory(const char* path, const Options opts)
 {
-    if (opts.recursive) traverse_recursive(path, opts, 0);
+    if (opts.recursive)
+    {
+        traverse_recursive(path, opts, 0);
+        return;
+    }
     struct stat info;
     char fullPath[PATH_MAX];
     DIR* dir = opendir(path);
@@ -48,15 +54,10 @@ void traverse_directory(const char* path, Options opts)
     while ((entry = readdir(dir)) != NULL)
     {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
+        if (entry->d_name[0] == '.' && !opts.show_all) continue;
         snprintf(fullPath, PATH_MAX, "%s/%s", path, entry->d_name);
         stat(fullPath, &info);
-        if (S_ISDIR(info.st_mode))
-        {
-            printUtils(entry->d_name, &info, opts, 0);
-        }else if (S_ISREG(info.st_mode))
-        {
-            printUtils(entry->d_name, &info, opts, 0);
-        }
+        printUtils(fullPath, entry->d_name, &info, opts, 0);
     }
     closedir(dir);
 }
