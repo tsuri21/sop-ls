@@ -11,7 +11,8 @@ int main(const int argc, char *argv[])
         .recursive = false,
         .human_readable = false,
         .show_size = false,
-        .show_all = false
+        .show_all = false,
+        .show_permissions = false
     };
     char* target_path = ".";
 
@@ -52,6 +53,11 @@ int main(const int argc, char *argv[])
         case 'c':
             opts.show_content = true;
             opts.c_counter = optionCounter;
+            continue;
+
+        case 'p':
+            opts.show_permissions = true;
+            opts.p_counter = optionCounter;
             continue;
 
         case 'a':
