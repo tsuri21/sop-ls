@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 #include "output_utils.h"
 
