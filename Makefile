@@ -5,7 +5,7 @@ TEST_DIR = tests
 INC_DIR = include
 BUILD_DIR = build
 
-APP_NAME = app
+APP_NAME = els
 TEST_NAME = test_runner
 
 CFLAGS = -Wall -Wextra -std=gnu11 -O0 -g
