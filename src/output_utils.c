@@ -124,7 +124,7 @@ static void printContent(const char* fullPath, const struct stat *info, const Op
 static void printPermissions(const struct stat *info, const Options opts)
 {
     if (opts.human_readable) {
-        printf("USER: ");
+        printf(ANSI_COLOR_RESET "USER: ");
         printf((info->st_mode & S_IRUSR) ? ANSI_COLOR_GREEN "r" ANSI_COLOR_RESET : "-");
         printf((info->st_mode & S_IWUSR) ? ANSI_COLOR_YELLOW "w" ANSI_COLOR_RESET : "-");
         printf((info->st_mode & S_IXUSR) ? ANSI_COLOR_RED "x" ANSI_COLOR_RESET : "-");
@@ -140,7 +140,7 @@ static void printPermissions(const struct stat *info, const Options opts)
         printf((info->st_mode & S_IXOTH) ? ANSI_COLOR_RED "x" ANSI_COLOR_RESET : "-");
     }
     else {
-        printf("%c%c%c%c%c%c%c%c%c",
+        printf(ANSI_COLOR_RESET "%c%c%c%c%c%c%c%c%c",
             (info->st_mode & S_IRUSR) ? 'r' : '-',
             (info->st_mode & S_IWUSR) ? 'w' : '-',
             (info->st_mode & S_IXUSR) ? 'x' : '-',
