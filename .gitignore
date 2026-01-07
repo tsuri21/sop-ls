@@ -54,4 +54,10 @@ dkms.conf
 # debug information files
 *.dwo
 
+# building
+cmake-build-debug
+build
+*CMakeLists.txt
+
+# coding ide
 .idea
