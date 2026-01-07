@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+
 #include "options.h"
+
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -14,20 +16,20 @@
 #define ANSI_COLOR_BOLD    "\x1b[1m"
 
 
-static void printColoring(const struct stat *info)
+static void print_coloring(const struct stat *info)
 {
     if (S_ISDIR(info->st_mode)) printf(ANSI_COLOR_BLUE);
     else if (info->st_mode & S_IXUSR || info->st_mode & S_IXGRP || info->st_mode & S_IXOTH) printf(ANSI_COLOR_RED);
 }
 
-static void printHumanReadable(const int depth, const struct stat *info)
+static void print_human_readable(const int depth, const struct stat *info)
 {
     for (int i = 0; i<depth; i++) printf("\t");
     if (S_ISDIR(info->st_mode)) printf("\u2514\u2500\u2500 ");
     else printf("\u251c\u2500\u2500 ");
 }
 
-static void printSize(const struct stat *info, const char* unit)
+static void print_size(const struct stat *info, const char* unit)
 {
     if (S_ISDIR(info->st_mode)) return;
     char* units[] = {"B", "KB", "MB", "GB", "TB"};
@@ -55,7 +57,7 @@ static void printSize(const struct stat *info, const char* unit)
     printf(ANSI_COLOR_MAGENTA "%.2f%s", size, units[unitIndex]);
 }
 
-static void printContent(const char* fullPath, const struct stat *info, const Options opts, const int depth)
+static void print_content(const char* fullPath, const struct stat *info, const Options opts, const int depth)
 {
     if (opts.c_counter == 0 || S_ISDIR(info->st_mode)) return;
 
@@ -121,7 +123,7 @@ static void printContent(const char* fullPath, const struct stat *info, const Op
     }
 }
 
-static void printPermissions(const struct stat *info, const Options opts)
+static void print_permissions(const struct stat *info, const Options opts)
 {
     if (opts.human_readable) {
         printf(ANSI_COLOR_RESET "USER: ");
@@ -153,15 +155,15 @@ static void printPermissions(const struct stat *info, const Options opts)
     }
 }
 
-void printUtils(const char* fullPath ,const char* fileName, const struct stat *info, const Options opts, const int depth)
+void print_utils(const char* fullPath ,const char* fileName, const struct stat *info, const Options opts, const int depth)
 {
-    printColoring(info);
-    if (opts.human_readable) printHumanReadable(depth, info);
+    print_coloring(info);
+    if (opts.human_readable) print_human_readable(depth, info);
     printf("%s ", fileName);
-    if (opts.show_permissions) printPermissions(info, opts);
+    if (opts.show_permissions) print_permissions(info, opts);
     printf(" ");
-    if (opts.show_size) printSize(info, opts.unit);
+    if (opts.show_size) print_size(info, opts.unit);
     printf("\n");
-    if (opts.show_content) printContent(fullPath, info, opts, depth);
+    if (opts.show_content) print_content(fullPath, info, opts, depth);
     printf(ANSI_COLOR_RESET);
 }

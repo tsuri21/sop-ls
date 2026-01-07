@@ -3,9 +3,9 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
 
 #include "output_utils.h"
+
 
 static void traverse_recursive(const char* path, const Options opts, const int depth)
 {
@@ -28,7 +28,7 @@ static void traverse_recursive(const char* path, const Options opts, const int d
         snprintf(fullPath, PATH_MAX, "%s/%s", path, entry->d_name);
         stat(fullPath, &info);
 
-        printUtils(fullPath, entry->d_name, &info, opts, depth);
+        print_utils(fullPath, entry->d_name, &info, opts, depth);
         if (S_ISDIR(info.st_mode)) traverse_recursive(fullPath, opts, depth+1);
     }
     closedir(dir);
@@ -58,7 +58,7 @@ void traverse_directory(const char* path, const Options opts)
         if (entry->d_name[0] == '.' && !opts.show_all) continue;
         snprintf(fullPath, PATH_MAX, "%s/%s", path, entry->d_name);
         stat(fullPath, &info);
-        printUtils(fullPath, entry->d_name, &info, opts, 0);
+        print_utils(fullPath, entry->d_name, &info, opts, 0);
     }
     closedir(dir);
 }
