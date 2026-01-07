@@ -4,34 +4,14 @@
 #include "options.h"
 #include "list_core.h"
 
-#ifdef _WIN32
-#include <windows.h> // Wird für SetConsoleOutputCP und SetConsoleMode benötigt
-#endif
-
 int main(const int argc, char *argv[])
 {
-    // --- Windows-spezifische Einstellungen START ---
-#ifdef _WIN32
-    // 1. Terminal auf UTF-8 umstellen (behebt die Ôö£ÔöÇ Zeichen)
-    SetConsoleOutputCP(65001);
-
-    // 2. ANSI-Farbcodes aktivieren (behebt die ←[0m Zeichen)
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut != INVALID_HANDLE_VALUE) {
-        DWORD dwMode = 0;
-        if (GetConsoleMode(hOut, &dwMode)) {
-            dwMode |= 0x0004; // ENABLE_VIRTUAL_TERMINAL_PROCESSING
-            SetConsoleMode(hOut, dwMode);
-        }
-    }
-#endif
     //option flags
     Options opts = {
         .recursive = false,
         .human_readable = false,
         .show_size = false,
-        .show_all = false,
-        .show_permissions = false
+        .show_all = false
     };
     char* target_path = ".";
 
@@ -76,11 +56,6 @@ int main(const int argc, char *argv[])
 
         case 'a':
             opts.show_all = true;
-            continue;
-
-        case 'p':
-            opts.show_permissions = true;
-            opts.p_counter = optionCounter;
             continue;
 
         default:
