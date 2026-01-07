@@ -10,5 +10,8 @@ typedef struct {
     bool show_content;
     int c_counter;
     bool show_all;
+    bool show_permissions;
+    int p_counter;
+
 } Options;
 #endif
