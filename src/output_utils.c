@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #include "options.h"
 
@@ -32,7 +33,7 @@ static void print_human_readable(const int depth, const struct stat *info)
 static void print_size(const struct stat *info, const char* unit)
 {
     if (S_ISDIR(info->st_mode)) return;
-    char* units[] = {"B", "KB", "MB", "GB", "TB"};
+    char* units[] = {"B ", "KB", "MB", "GB", "TB"};
 
     bool unitsContainUnit = false;
     int counter = 0;
@@ -54,7 +55,7 @@ static void print_size(const struct stat *info, const char* unit)
         size /= 1024;
         unitIndex++;
     }
-    printf(ANSI_COLOR_MAGENTA "%.2f%s", size, units[unitIndex]);
+    printf(ANSI_COLOR_MAGENTA "%.2f%s " ANSI_COLOR_RESET, size, units[unitIndex]);
 }
 
 static void print_content(const char* fullPath, const struct stat *info, const Options opts, const int depth)
@@ -149,6 +150,24 @@ static void print_permissions(const struct stat *info, const Options opts)
     printf(" ");
 }
 
+static void print_last_modified(const struct stat *info, const Options opts) {
+    char dateStr[64];
+    struct tm *timeInfo;
+    time_t lastModified = info->st_mtime;
+
+    time(&lastModified);
+    timeInfo = localtime(&lastModified);
+
+    if (opts.human_readable) {
+        strftime(dateStr, 64, "%d. %b %Y %X", timeInfo);
+    }
+    else {
+        strftime(dateStr, 64, "%x %X", timeInfo);
+    }
+    printf("%s ", dateStr);
+}
+
+
 void print_utils(const char* fullPath ,const char* fileName, const struct stat *info, const Options opts, const int depth)
 {
     print_coloring(info);
@@ -157,6 +176,7 @@ void print_utils(const char* fullPath ,const char* fileName, const struct stat *
     if (opts.show_permissions) print_permissions(info, opts);
     printf(" ");
     if (opts.show_size) print_size(info, opts.unit);
+    if (opts.show_last_modified) print_last_modified(info, opts);
     printf("\n");
     if (opts.show_content) print_content(fullPath, info, opts, depth);
     printf(ANSI_COLOR_RESET);
