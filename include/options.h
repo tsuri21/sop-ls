@@ -12,5 +12,5 @@ typedef struct {
     int c_counter;
     bool show_all;
     bool show_permissions;
-    int p_counter;
+    bool show_last_modified;
 } Options;
