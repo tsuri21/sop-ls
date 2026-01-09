@@ -125,34 +125,28 @@ static void print_content(const char* fullPath, const struct stat *info, const O
 
 static void print_permissions(const struct stat *info, const Options opts)
 {
-    if (opts.human_readable) {
-        printf(ANSI_COLOR_RESET "USER: ");
-        printf((info->st_mode & S_IRUSR) ? ANSI_COLOR_GREEN "r" ANSI_COLOR_RESET : "-");
-        printf((info->st_mode & S_IWUSR) ? ANSI_COLOR_YELLOW "w" ANSI_COLOR_RESET : "-");
-        printf((info->st_mode & S_IXUSR) ? ANSI_COLOR_RED "x" ANSI_COLOR_RESET : "-");
+    mode_t masks[] = { S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP, S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH};
+    char chars[] = "rwx";
+    char *labels[] = {"USER:", " GROUP:", " OTHERS:"};
 
-        printf(" GROUP: ");
-        printf((info->st_mode & S_IRGRP) ? ANSI_COLOR_GREEN "r" ANSI_COLOR_RESET : "-");
-        printf((info->st_mode & S_IWGRP) ? ANSI_COLOR_YELLOW "w" ANSI_COLOR_RESET : "-");
-        printf((info->st_mode & S_IXGRP) ? ANSI_COLOR_RED "x" ANSI_COLOR_RESET : "-");
-
-        printf(" OTHERS: ");
-        printf((info->st_mode & S_IROTH) ? ANSI_COLOR_GREEN "r" ANSI_COLOR_RESET : "-");
-        printf((info->st_mode & S_IWOTH) ? ANSI_COLOR_YELLOW "w" ANSI_COLOR_RESET : "-");
-        printf((info->st_mode & S_IXOTH) ? ANSI_COLOR_RED "x" ANSI_COLOR_RESET : "-");
+    for (int i = 0; i < 9; i++){
+        if (opts.human_readable && i%3==0){
+            printf(ANSI_COLOR_RESET "%s", labels[i/3]);
+        }
+        if (info->st_mode && masks[i]) {
+            if (opts.human_readable) {
+                const char *colors[] = {ANSI_COLOR_GREEN, ANSI_COLOR_YELLOW , ANSI_COLOR_RED};
+                printf( "%s%c" ANSI_COLOR_RESET, colors[i % 3], chars[i % 3]);
+            }
+            else {
+                printf(ANSI_COLOR_RESET "%c", chars[i % 3]);
+            }
+        }
+        else {
+            putchar('-');
+        }
     }
-    else {
-        printf(ANSI_COLOR_RESET "%c%c%c%c%c%c%c%c%c",
-            (info->st_mode & S_IRUSR) ? 'r' : '-',
-            (info->st_mode & S_IWUSR) ? 'w' : '-',
-            (info->st_mode & S_IXUSR) ? 'x' : '-',
-            (info->st_mode & S_IRGRP) ? 'r' : '-',
-            (info->st_mode & S_IWGRP) ? 'w' : '-',
-            (info->st_mode & S_IXGRP) ? 'x' : '-',
-            (info->st_mode & S_IROTH) ? 'r' : '-',
-            (info->st_mode & S_IWOTH) ? 'w' : '-',
-            (info->st_mode & S_IXOTH) ? 'x' : '-');
-    }
+    printf(" ");
 }
 
 void print_utils(const char* fullPath ,const char* fileName, const struct stat *info, const Options opts, const int depth)
