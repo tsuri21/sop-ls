@@ -57,7 +57,10 @@ int main(const int argc, char *argv[])
 
         case 'p':
             opts.show_permissions = true;
-            opts.p_counter = optionCounter;
+            continue;
+
+        case 'm':
+            opts.show_last_modified = true;
             continue;
 
         case 'a':
