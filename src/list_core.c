@@ -17,7 +17,7 @@ typedef struct linked_list{
 
 Node* head;
 
-static int my_strcmp(const char* s1, const char* s2){
+static int compare_full_paths(const char* s1, const char* s2){
     const size_t min = strlen(s1) > strlen(s2) ? strlen(s2) : strlen(s1);
     for(int i = 0; i < min; i++){
         char c1 = s1[i];
@@ -30,7 +30,7 @@ static int my_strcmp(const char* s1, const char* s2){
     return 0;
 }
 
-static void insert(Node* head, const char* fullPath, const char* fileName, const struct stat* info, const int depth, const bool descending)
+static void insert(const char* fullPath, const char* fileName, const struct stat* info, const int depth, const bool descending)
 {
     Node* newNode = malloc(sizeof(Node));
     strncpy(newNode->fullPath, fullPath, sizeof(newNode->fullPath));
@@ -40,16 +40,15 @@ static void insert(Node* head, const char* fullPath, const char* fileName, const
     newNode->next = NULL;
 
     Node* current = head;
-    //important: don't use strcmp because it is not case-sensitive, instead use strcasecmp
-    while (current->next != NULL && ((my_strcmp(current->next->fullPath, newNode->fullPath) <= 0 && !descending) ||
-        (my_strcmp(current->next->fullPath, newNode->fullPath) >= 0 && descending))){
+    while (current->next != NULL && ((compare_full_paths(current->next->fullPath, newNode->fullPath) <= 0 && !descending) ||
+        (compare_full_paths(current->next->fullPath, newNode->fullPath) >= 0 && descending))){
         current = current->next;
     }
     newNode->next = current->next;
     current->next = newNode;
 }
 
-static void print_and_free(Node* head, const Options opts){
+static void print_and_free(const Options opts){
     Node* current = head->next;
     while (current != NULL){
         print_utils(current->fullPath, current->fileName, &current->info, opts, current->depth);
@@ -81,7 +80,7 @@ static void traverse_recursive(const char* path, const Options opts, const int d
         snprintf(fullPath, PATH_MAX, "%s/%s", path, entry->d_name);
         stat(fullPath, &info);
 
-        insert(head, fullPath, entry->d_name, &info, depth, opts.descending_order);
+        insert(fullPath, entry->d_name, &info, depth, opts.descending_order);
         if (S_ISDIR(info.st_mode)) traverse_recursive(fullPath, opts, depth+1);
     }
     closedir(dir);
@@ -95,7 +94,7 @@ void traverse_directory(const char* path, const Options opts)
     if (opts.recursive)
     {
         traverse_recursive(path, opts, 0);
-        print_and_free(head, opts);
+        print_and_free(opts);
         return;
     }
     struct stat info;
@@ -115,9 +114,9 @@ void traverse_directory(const char* path, const Options opts)
         if (entry->d_name[0] == '.' && !opts.show_all) continue;
         snprintf(fullPath, PATH_MAX, "%s/%s", path, entry->d_name);
         stat(fullPath, &info);
-        //instead of printing, it should insert in the linkedList
-        insert(head, fullPath, entry->d_name, &info, 0, opts.descending_order);
+
+        insert(fullPath, entry->d_name, &info, 0, opts.descending_order);
     }
     closedir(dir);
-    print_and_free(head, opts);
+    print_and_free(opts);
 }
