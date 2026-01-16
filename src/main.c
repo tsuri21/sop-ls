@@ -12,7 +12,9 @@ int main(const int argc, char *argv[])
         .human_readable = false,
         .show_size = false,
         .show_all = false,
-        .show_permissions = false
+        .show_permissions = false,
+        .show_last_modified = false,
+        .show_content = false,
     };
     char* target_path = ".";
 
@@ -65,6 +67,10 @@ int main(const int argc, char *argv[])
 
         case 'a':
             opts.show_all = true;
+            continue;
+
+        case 'd':
+            opts.descending_order = true;
             continue;
 
         default:

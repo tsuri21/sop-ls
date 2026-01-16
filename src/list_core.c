@@ -17,7 +17,20 @@ typedef struct linked_list{
 
 Node* head;
 
-static void insert(Node* head, const char* fullPath, const char* fileName, const struct stat* info, const int depth)
+static int my_strcmp(const char* s1, const char* s2){
+    const size_t min = strlen(s1) > strlen(s2) ? strlen(s2) : strlen(s1);
+    for(int i = 0; i < min; i++){
+        char c1 = s1[i];
+        char c2 = s2[i];
+        if (c1 >= 'A' && c1 <= 'Z') c1 += 'a' - 'A';
+        if (c2 >= 'A' && c2 <= 'Z') c2 += 'a' - 'A';
+        if (c1 < c2) return -1;
+        if (c1 > c2) return 1;
+    }
+    return 0;
+}
+
+static void insert(Node* head, const char* fullPath, const char* fileName, const struct stat* info, const int depth, const bool descending)
 {
     Node* newNode = malloc(sizeof(Node));
     strncpy(newNode->fullPath, fullPath, sizeof(newNode->fullPath));
@@ -27,8 +40,9 @@ static void insert(Node* head, const char* fullPath, const char* fileName, const
     newNode->next = NULL;
 
     Node* current = head;
-    //important: don't use strcmp because it is not case-sensitive, instead use staircase
-    while (current->next != NULL && strcasecmp(current->next->fullPath, newNode->fullPath) < 0){
+    //important: don't use strcmp because it is not case-sensitive, instead use strcasecmp
+    while (current->next != NULL && ((my_strcmp(current->next->fullPath, newNode->fullPath) <= 0 && !descending) ||
+        (my_strcmp(current->next->fullPath, newNode->fullPath) >= 0 && descending))){
         current = current->next;
     }
     newNode->next = current->next;
@@ -67,7 +81,7 @@ static void traverse_recursive(const char* path, const Options opts, const int d
         snprintf(fullPath, PATH_MAX, "%s/%s", path, entry->d_name);
         stat(fullPath, &info);
 
-        insert(head, fullPath, entry->d_name, &info, depth);
+        insert(head, fullPath, entry->d_name, &info, depth, opts.descending_order);
         if (S_ISDIR(info.st_mode)) traverse_recursive(fullPath, opts, depth+1);
     }
     closedir(dir);
@@ -102,7 +116,7 @@ void traverse_directory(const char* path, const Options opts)
         snprintf(fullPath, PATH_MAX, "%s/%s", path, entry->d_name);
         stat(fullPath, &info);
         //instead of printing, it should insert in the linkedList
-        insert(head, fullPath, entry->d_name, &info, 0);
+        insert(head, fullPath, entry->d_name, &info, 0, opts.descending_order);
     }
     closedir(dir);
     print_and_free(head, opts);

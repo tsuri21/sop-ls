@@ -13,4 +13,5 @@ typedef struct {
     bool show_all;
     bool show_permissions;
     bool show_last_modified;
+    bool descending_order;
 } Options;
